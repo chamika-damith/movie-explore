@@ -23,7 +23,7 @@ const NavBar = () => {
     }
   };
 
-  const handleSetSearchQuery = (value: string) => {
+  const setSearchQueryValue = (value: string) => {
     dispatch(setSearchQuery(value));
   };
 
@@ -59,7 +59,7 @@ const NavBar = () => {
               placeholder="Search movies..."
               className="pr-10"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => setSearchQueryValue(e.target.value)}
             />
             <Button 
               type="submit" 
@@ -149,7 +149,7 @@ const NavBar = () => {
                 placeholder="Search movies..."
                 className="pr-10 w-full"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQueryValue(e.target.value)}
               />
               <Button 
                 type="submit" 

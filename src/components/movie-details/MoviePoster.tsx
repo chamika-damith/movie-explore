@@ -1,13 +1,13 @@
 
 import React from "react";
-import { Movie } from "@/store/slices/movieSlice";
+import { Movie, MovieDetail } from "@/store/slices/movieSlice";
 import { toggleFavorite } from "@/store/slices/movieSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { Button } from "@/components/ui/button";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 
 interface MoviePosterProps {
-  movie: Movie;
+  movie: MovieDetail; // Changed from Movie to MovieDetail to have access to genres and runtime
   posterUrl: string;
 }
 

@@ -1,7 +1,7 @@
 
 import React from "react";
 import MovieCard from "./MovieCard";
-import { Movie } from "@/contexts/MovieContext";
+import { Movie } from "@/store/slices/movieSlice";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface MovieGridProps {

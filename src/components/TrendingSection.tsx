@@ -8,7 +8,7 @@ import FilterSection from "./FilterSection";
 
 const TrendingSection = () => {
   const dispatch = useAppDispatch();
-  const { trendingMovies, searchResults, isLoading, searchQuery, genreFilter, yearFilter, ratingFilter } = useAppSelector(state => state.movies);
+  const { trendingMovies, isLoading, genreFilter, yearFilter, ratingFilter } = useAppSelector(state => state.movies);
   
   // Apply filters
   const filteredMovies = trendingMovies.filter(movie => {

@@ -1,22 +1,34 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { useMovies } from "@/contexts/MovieContext";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { useThemeMode } from "@/hooks/useThemeMode";
+import { setSearchQuery, searchMovies, clearSearchResults } from "@/store/slices/movieSlice";
+import { logoutSuccess } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Sun, Moon, Film, User, LogOut } from "lucide-react";
 
 const NavBar = () => {
-  const { theme, toggleTheme } = useTheme();
-  const { user, logout } = useAuth();
-  const { searchQuery, setSearchQuery, searchMovies } = useMovies();
+  const { theme, toggleTheme } = useThemeMode();
+  const { user } = useAppSelector(state => state.auth);
+  const { searchQuery } = useAppSelector(state => state.movies);
+  const dispatch = useAppDispatch();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    searchMovies(searchQuery);
+    if (searchQuery.trim()) {
+      dispatch(searchMovies(searchQuery));
+    }
+  };
+
+  const handleSetSearchQuery = (value: string) => {
+    dispatch(setSearchQuery(value));
+  };
+
+  const logout = () => {
+    dispatch(logoutSuccess());
   };
 
   return (

@@ -3,19 +3,21 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useAppSelector, useAppDispatch } from "@/hooks/redux";
-import { Movie, MovieDetail, toggleFavorite } from "@/store/slices/movieSlice";
+import { MovieDetail } from "@/store/slices/movieSlice";
 import NavBar from "@/components/NavBar";
-import { Bookmark, BookmarkCheck, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import MovieBackdrop from "@/components/movie-details/MovieBackdrop";
+import MoviePoster from "@/components/movie-details/MoviePoster";
+import MovieInfo from "@/components/movie-details/MovieInfo";
+import MovieDetailsSkeleton from "@/components/movie-details/MovieDetailsSkeleton";
+import MovieNotFound from "@/components/movie-details/MovieNotFound";
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector(state => state.auth);
-  const { favorites } = useAppSelector(state => state.movies);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -59,25 +61,6 @@ const MovieDetails = () => {
     navigate(-1);
   };
 
-  const handleToggleFavorite = () => {
-    if (movie) {
-      // Convert MovieDetail to Movie type by extracting necessary properties
-      const movieForStore: Movie = {
-        id: movie.id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        backdrop_path: movie.backdrop_path,
-        release_date: movie.release_date,
-        vote_average: movie.vote_average,
-        overview: movie.overview,
-        genre_ids: movie.genres?.map(genre => genre.id) || [],
-      };
-      dispatch(toggleFavorite(movieForStore));
-    }
-  };
-
-  const isFav = movie ? favorites.some(fav => fav.id === movie.id) : false;
-
   const backdropUrl = movie?.backdrop_path
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
     : null;
@@ -91,34 +74,10 @@ const MovieDetails = () => {
       <NavBar />
       
       {isLoading ? (
-        <div className="container-fluid py-8 space-y-8">
-          <div className="flex items-center space-x-4">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <Skeleton className="h-8 w-48" />
-          </div>
-          <Skeleton className="h-[400px] w-full rounded-xl" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-[500px] w-full rounded-lg" />
-            <div className="md:col-span-2 space-y-4">
-              <Skeleton className="h-12 w-3/4" />
-              <Skeleton className="h-6 w-1/2" />
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-40 w-full" />
-            </div>
-          </div>
-        </div>
+        <MovieDetailsSkeleton />
       ) : movie ? (
         <div className="animate-fade-in">
-          {/* Backdrop */}
-          {backdropUrl && (
-            <div className="relative h-[300px] md:h-[400px] overflow-hidden">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${backdropUrl})` }}
-              ></div>
-              <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
-            </div>
-          )}
+          <MovieBackdrop backdropUrl={backdropUrl} />
 
           <div className="container-fluid relative">
             {/* Back button */}
@@ -134,143 +93,16 @@ const MovieDetails = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Poster */}
               <div className="md:col-span-1">
-                <div className="sticky top-24 space-y-4">
-                  <div className="relative rounded-lg overflow-hidden shadow-lg">
-                    <img
-                      src={posterUrl}
-                      alt={movie.title}
-                      className="w-full h-auto"
-                    />
-                    <div className="absolute top-2 right-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="bg-black/30 hover:bg-black/50 rounded-full h-10 w-10"
-                        onClick={handleToggleFavorite}
-                      >
-                        {isFav ? (
-                          <BookmarkCheck className="h-5 w-5 text-movie-primary" />
-                        ) : (
-                          <Bookmark className="h-5 w-5 text-white" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Rating */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <span className="text-yellow-500 mr-1">⭐</span>
-                      <span className="font-bold">{movie.vote_average?.toFixed(1)}</span>
-                      <span className="text-muted-foreground ml-1">/ 10</span>
-                    </div>
-                    {movie.release_date && (
-                      <div className="text-sm text-muted-foreground">
-                        {new Date(movie.release_date).getFullYear()}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Runtime */}
-                  {movie.runtime && (
-                    <div className="text-sm text-muted-foreground">
-                      {Math.floor(movie.runtime / 60)}h {movie.runtime % 60}m
-                    </div>
-                  )}
-
-                  {/* Genres */}
-                  {movie.genres && movie.genres.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {movie.genres.map((genre) => (
-                        <span
-                          key={genre.id}
-                          className="px-3 py-1 bg-muted rounded-full text-xs"
-                        >
-                          {genre.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <MoviePoster movie={movie} posterUrl={posterUrl} />
               </div>
 
               {/* Details */}
-              <div className="md:col-span-2 space-y-6">
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold">{movie.title}</h1>
-                  {movie.tagline && (
-                    <p className="text-lg text-muted-foreground mt-2 italic">
-                      "{movie.tagline}"
-                    </p>
-                  )}
-                </div>
-
-                {/* Overview */}
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">Overview</h2>
-                  <p className="text-muted-foreground">{movie.overview}</p>
-                </div>
-
-                {/* Trailer - Assuming videos are included in the response */}
-                {movie.videos && movie.videos.results && movie.videos.results.length > 0 && (
-                  <div className="mt-8">
-                    <h2 className="text-xl font-semibold mb-4">Trailer</h2>
-                    <div className="relative aspect-video w-full">
-                      <iframe
-                        className="absolute inset-0 w-full h-full rounded-lg"
-                        src={`https://www.youtube.com/embed/${movie.videos.results[0].key}`}
-                        title="YouTube video player"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                  </div>
-                )}
-
-                {/* Cast - Assuming credits are included in the response */}
-                {movie.credits && movie.credits.cast && movie.credits.cast.length > 0 && (
-                  <div className="mt-8">
-                    <h2 className="text-xl font-semibold mb-4">Top Cast</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                      {movie.credits.cast.slice(0, 5).map((actor) => (
-                        <div key={actor.id} className="text-center">
-                          <div className="rounded-full overflow-hidden w-16 h-16 mx-auto mb-2">
-                            {actor.profile_path ? (
-                              <img
-                                src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`}
-                                alt={actor.name}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <span className="text-2xl">👤</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-sm font-medium truncate">
-                            {actor.name}
-                          </div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {actor.character}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <MovieInfo movie={movie} />
             </div>
           </div>
         </div>
       ) : (
-        <div className="container-fluid py-20 text-center">
-          <h2 className="text-2xl font-bold mb-2">Movie Not Found</h2>
-          <p className="text-muted-foreground mb-6">
-            We couldn't find the movie you're looking for.
-          </p>
-          <Button onClick={handleBack}>Go Back</Button>
-        </div>
+        <MovieNotFound onBackClick={handleBack} />
       )}
     </div>
   );

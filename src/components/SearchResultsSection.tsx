@@ -3,9 +3,10 @@ import React from "react";
 import { useMovies } from "@/contexts/MovieContext";
 import MovieGrid from "./MovieGrid";
 import { Search } from "lucide-react";
+import FilterSection from "./FilterSection";
 
 const SearchResultsSection = () => {
-  const { searchResults, isLoading, searchQuery } = useMovies();
+  const { filteredMovies, isLoading, searchQuery } = useMovies();
 
   if (!searchQuery) {
     return null;
@@ -19,8 +20,11 @@ const SearchResultsSection = () => {
           Search Results: "{searchQuery}"
         </h2>
       </div>
+      
+      <FilterSection />
+      
       <MovieGrid 
-        movies={searchResults} 
+        movies={filteredMovies} 
         isLoading={isLoading} 
         emptyMessage="No movies found matching your search" 
       />

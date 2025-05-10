@@ -26,6 +26,15 @@ interface MovieContextType {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   clearSearchResults: () => void;
+  // Add filter state and functions
+  genreFilter: number | null;
+  yearFilter: string | null;
+  ratingFilter: number | null;
+  setGenreFilter: (genreId: number | null) => void;
+  setYearFilter: (year: string | null) => void;
+  setRatingFilter: (rating: number | null) => void;
+  clearFilters: () => void;
+  filteredMovies: Movie[];
 }
 
 const MovieContext = createContext<MovieContextType | null>(null);
@@ -42,6 +51,11 @@ export const MovieProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
+
+  // Add filter states
+  const [genreFilter, setGenreFilter] = useState<number | null>(null);
+  const [yearFilter, setYearFilter] = useState<string | null>(null);
+  const [ratingFilter, setRatingFilter] = useState<number | null>(null);
 
   // Load favorites from localStorage
   useEffect(() => {
@@ -61,6 +75,42 @@ export const MovieProvider = ({ children }: { children: ReactNode }) => {
       searchMovies(lastSearch);
     }
   }, []);
+
+  // Filter movies based on selected filters
+  const applyFilters = (movies: Movie[]) => {
+    return movies.filter(movie => {
+      // Apply genre filter
+      if (genreFilter && !movie.genre_ids.includes(genreFilter)) {
+        return false;
+      }
+      
+      // Apply year filter
+      if (yearFilter && movie.release_date) {
+        const movieYear = movie.release_date.split('-')[0];
+        if (movieYear !== yearFilter) {
+          return false;
+        }
+      }
+      
+      // Apply rating filter
+      if (ratingFilter !== null && movie.vote_average < ratingFilter) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
+  // Compute filtered movies
+  const filteredMovies = searchQuery 
+    ? applyFilters(searchResults) 
+    : applyFilters(trendingMovies);
+
+  const clearFilters = () => {
+    setGenreFilter(null);
+    setYearFilter(null);
+    setRatingFilter(null);
+  };
 
   const fetchTrendingMovies = async () => {
     setIsLoading(true);
@@ -172,6 +222,15 @@ export const MovieProvider = ({ children }: { children: ReactNode }) => {
         searchQuery,
         setSearchQuery,
         clearSearchResults,
+        // Add filter related values
+        genreFilter,
+        yearFilter,
+        ratingFilter,
+        setGenreFilter,
+        setYearFilter,
+        setRatingFilter,
+        clearFilters,
+        filteredMovies,
       }}
     >
       {children}

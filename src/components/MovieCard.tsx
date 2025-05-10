@@ -1,7 +1,9 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { Movie, useMovies } from "@/contexts/MovieContext";
+import { Movie } from "@/store/slices/movieSlice";
+import { toggleFavorite } from "@/store/slices/movieSlice";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,7 +13,9 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
-  const { toggleFavorite, isFavorite } = useMovies();
+  const dispatch = useAppDispatch();
+  const { favorites } = useAppSelector(state => state.movies);
+  
   const posterUrl = movie.poster_path
     ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
     : "/placeholder.svg";
@@ -20,7 +24,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     ? new Date(movie.release_date).getFullYear()
     : "Unknown";
   
-  const isFav = isFavorite(movie.id);
+  const isFav = favorites.some(fav => fav.id === movie.id);
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    dispatch(toggleFavorite(movie));
+  };
 
   return (
     <Card className="movie-card group h-[350px] relative overflow-hidden">
@@ -37,10 +46,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             size="icon" 
             variant="ghost"
             className="bg-black/30 hover:bg-black/50 rounded-full h-8 w-8"
-            onClick={(e) => {
-              e.preventDefault();
-              toggleFavorite(movie);
-            }}
+            onClick={handleToggleFavorite}
           >
             {isFav ? (
               <BookmarkCheck className="h-5 w-5 text-movie-primary" />

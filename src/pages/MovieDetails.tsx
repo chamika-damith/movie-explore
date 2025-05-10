@@ -2,31 +2,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
-import { useMovies } from "@/contexts/MovieContext";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { Movie, MovieDetail, toggleFavorite } from "@/store/slices/movieSlice";
 import NavBar from "@/components/NavBar";
 import { Bookmark, BookmarkCheck, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-interface Genre {
-  id: number;
-  name: string;
-}
-
-interface MovieDetail extends Movie {
-  genres: Genre[];
-  runtime?: number;
-  tagline?: string;
-  homepage?: string;
-}
-
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
-  const { toggleFavorite, isFavorite } = useMovies();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector(state => state.auth);
+  const { favorites } = useAppSelector(state => state.movies);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -72,11 +61,22 @@ const MovieDetails = () => {
 
   const handleToggleFavorite = () => {
     if (movie) {
-      toggleFavorite(movie);
+      // Convert MovieDetail to Movie type by extracting necessary properties
+      const movieForStore: Movie = {
+        id: movie.id,
+        title: movie.title,
+        poster_path: movie.poster_path,
+        backdrop_path: movie.backdrop_path,
+        release_date: movie.release_date,
+        vote_average: movie.vote_average,
+        overview: movie.overview,
+        genre_ids: movie.genres?.map(genre => genre.id) || [],
+      };
+      dispatch(toggleFavorite(movieForStore));
     }
   };
 
-  const isFav = movie ? isFavorite(movie.id) : false;
+  const isFav = movie ? favorites.some(fav => fav.id === movie.id) : false;
 
   const backdropUrl = movie?.backdrop_path
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`

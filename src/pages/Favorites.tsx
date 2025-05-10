@@ -1,18 +1,17 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useMovies } from "@/contexts/MovieContext";
+import { useAppSelector } from "@/hooks/redux";
 import NavBar from "@/components/NavBar";
 import MovieGrid from "@/components/MovieGrid";
 import { Bookmark } from "lucide-react";
 
 const Favorites = () => {
-  const { user, isLoading: authLoading } = useAuth();
-  const { favorites } = useMovies();
+  const { user, isLoading: authLoading } = useAppSelector(state => state.auth);
+  const { favorites } = useAppSelector(state => state.movies);
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!authLoading && !user) {
       navigate("/login");
     }

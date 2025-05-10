@@ -1,15 +1,14 @@
 
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAppSelector } from "@/hooks/redux";
 import NavBar from "@/components/NavBar";
 import TrendingSection from "@/components/TrendingSection";
 import SearchResultsSection from "@/components/SearchResultsSection";
-import { useMovies } from "@/contexts/MovieContext";
 
 const Index = () => {
-  const { user, isLoading: authLoading } = useAuth();
-  const { searchQuery } = useMovies();
+  const { user, isLoading: authLoading } = useAppSelector(state => state.auth);
+  const { searchQuery } = useAppSelector(state => state.movies);
   const navigate = useNavigate();
 
   useEffect(() => {

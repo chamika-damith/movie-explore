@@ -1,12 +1,41 @@
 
-import React from "react";
-import { useMovies } from "@/contexts/MovieContext";
+import React, { useEffect } from "react";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { fetchTrendingMovies } from "@/store/slices/movieSlice";
 import MovieGrid from "./MovieGrid";
 import { TrendingUp } from "lucide-react";
 import FilterSection from "./FilterSection";
 
 const TrendingSection = () => {
-  const { filteredMovies, isLoading } = useMovies();
+  const dispatch = useAppDispatch();
+  const { trendingMovies, searchResults, isLoading, searchQuery, genreFilter, yearFilter, ratingFilter } = useAppSelector(state => state.movies);
+  
+  // Apply filters
+  const filteredMovies = trendingMovies.filter(movie => {
+    // Apply genre filter
+    if (genreFilter && !movie.genre_ids.includes(genreFilter)) {
+      return false;
+    }
+    
+    // Apply year filter
+    if (yearFilter && movie.release_date) {
+      const movieYear = movie.release_date.split('-')[0];
+      if (movieYear !== yearFilter) {
+        return false;
+      }
+    }
+    
+    // Apply rating filter
+    if (ratingFilter !== null && movie.vote_average < ratingFilter) {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  useEffect(() => {
+    dispatch(fetchTrendingMovies());
+  }, [dispatch]);
 
   return (
     <section className="py-8">

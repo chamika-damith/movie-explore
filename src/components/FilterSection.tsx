@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from "react";
-import { useMovies } from "@/contexts/MovieContext";
+import { useAppSelector, useAppDispatch } from "@/hooks/redux";
+import { setGenreFilter, setYearFilter, setRatingFilter, clearFilters } from "@/store/slices/movieSlice";
 import { 
   Select, 
   SelectTrigger, 
@@ -48,30 +49,45 @@ const RATINGS = [
 ];
 
 const FilterSection = () => {
-  const { 
-    genreFilter, 
-    yearFilter, 
-    ratingFilter, 
-    setGenreFilter, 
-    setYearFilter, 
-    setRatingFilter,
-    clearFilters,
-    filteredMovies,
-    searchQuery,
-    trendingMovies,
-    searchResults
-  } = useMovies();
-
+  const dispatch = useAppDispatch();
+  const { genreFilter, yearFilter, ratingFilter, searchQuery, trendingMovies, searchResults } = useAppSelector(state => state.movies);
+  
   const [filtersActive, setFiltersActive] = useState(false);
   const [totalMovies, setTotalMovies] = useState(0);
   const [filteredCount, setFilteredCount] = useState(0);
+
+  // Calculate filtered movies based on current filters
+  const getFilteredMovies = () => {
+    const movies = searchQuery ? searchResults : trendingMovies;
+    return movies.filter(movie => {
+      // Apply genre filter
+      if (genreFilter && !movie.genre_ids.includes(genreFilter)) {
+        return false;
+      }
+      
+      // Apply year filter
+      if (yearFilter && movie.release_date) {
+        const movieYear = movie.release_date.split('-')[0];
+        if (movieYear !== yearFilter) {
+          return false;
+        }
+      }
+      
+      // Apply rating filter
+      if (ratingFilter !== null && movie.vote_average < ratingFilter) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
 
   // Calculate total and filtered counts
   useEffect(() => {
     const total = searchQuery ? searchResults.length : trendingMovies.length;
     setTotalMovies(total);
-    setFilteredCount(filteredMovies.length);
-  }, [filteredMovies, searchQuery, searchResults, trendingMovies]);
+    setFilteredCount(getFilteredMovies().length);
+  }, [genreFilter, yearFilter, ratingFilter, searchQuery, searchResults, trendingMovies]);
 
   // Determine if any filters are active
   useEffect(() => {
@@ -83,19 +99,19 @@ const FilterSection = () => {
   }, [genreFilter, yearFilter, ratingFilter]);
 
   const handleGenreChange = (value: string) => {
-    setGenreFilter(value === "all" ? null : parseInt(value));
+    dispatch(setGenreFilter(value === "all" ? null : parseInt(value)));
   };
 
   const handleYearChange = (value: string) => {
-    setYearFilter(value === "all" ? null : value);
+    dispatch(setYearFilter(value === "all" ? null : value));
   };
 
   const handleRatingChange = (value: string) => {
-    setRatingFilter(parseInt(value));
+    dispatch(setRatingFilter(parseInt(value)));
   };
 
   const handleClearFilters = () => {
-    clearFilters();
+    dispatch(clearFilters());
   };
 
   return (

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Film } from "lucide-react";
+import { Film, ListVideo } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 const Login = () => {
@@ -50,7 +50,7 @@ const Login = () => {
         <Card className="backdrop-blur-sm bg-background/70 border-muted">
           <CardHeader className="space-y-1 text-center">
             <div className="flex justify-center mb-4">
-              <Film className="h-10 w-10 text-movie-primary" />
+              <ListVideo />
             </div>
             <CardTitle className="text-2xl font-bold">ReelVerse Explorer</CardTitle>
             <CardDescription>Sign in to discover and explore movies</CardDescription>

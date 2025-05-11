@@ -7,7 +7,7 @@ import { setSearchQuery, searchMovies, clearSearchResults } from "@/store/slices
 import { logoutSuccess } from "@/store/slices/authSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sun, Moon, Film, User, LogOut } from "lucide-react";
+import { Search, Sun, Moon, Film, User, LogOut, ListVideo } from "lucide-react";
 
 const NavBar = () => {
   const { theme, toggleTheme } = useThemeMode();
@@ -38,8 +38,7 @@ const NavBar = () => {
           {/* Logo and Nav Links */}
           <div className="flex items-center space-x-6">
             <Link to="/" className="flex items-center space-x-2">
-              <Film className="h-6 w-6 text-movie-primary" />
-              <span className="text-xl font-bold">ReelVerse</span>
+              <ListVideo />
             </Link>
             
             <nav className="hidden md:flex space-x-4">
